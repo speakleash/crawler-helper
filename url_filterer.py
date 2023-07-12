@@ -82,15 +82,14 @@ class UrlFilterer:
 
         if base_url not in self.robots_parsers:
             rp = RobotFileParser()
-            try:
-                rp.set_url(urljoin(base_url, '/robots.txt'))
-                rp.read()
+            try:                
+                response = httpx.get(urljoin(base_url, '/robots.txt'))
+                rp.parse(response.text.splitlines())
                 self.robots_parsers[base_url] = rp
-            except (httpx.RequestError, urllib.error.URLError, socket.gaierror):
-                print("***Error fetching robots.txt***")
-                # Handle exceptions when retrieving robots.txt
-                return False  # Allow crawling if unable to retrieve robots.txt
+            except:
+                print("***Error fetching robots.txt***")               
+                return False  # Disallow crawling if unable to retrieve robots.txt
         else:
             rp = self.robots_parsers[base_url]
 
-        return rp.can_fetch('*', url)
+        return rp.can_fetch('Speakleash-v0.1', url)
